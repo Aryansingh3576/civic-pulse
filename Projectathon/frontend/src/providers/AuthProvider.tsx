@@ -63,13 +63,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, [fetchProfile]);
 
     const login = useCallback(async (email: string, password: string) => {
-        const res = await api.post("/users/login", { email, password });
-        const { token: newToken, data } = res.data;
+        try {
+            const res = await api.post("/users/login", { email, password });
+            const { token: newToken, data } = res.data;
 
-        localStorage.setItem("token", newToken);
-        setToken(newToken);
-        setUser(data.user);
-        router.push("/dashboard");
+            localStorage.setItem("token", newToken);
+            setToken(newToken);
+            setUser(data.user);
+            router.push("/dashboard");
+        } catch (err: any) {
+            // Handle unverified account — redirect to OTP verification
+            if (err?.response?.status === 403 && err?.response?.data?.data?.requiresOTP) {
+                throw { requiresOTP: true, email: err.response.data.data.email, message: err.response.data.message };
+            }
+            throw err;
+        }
     }, [router]);
 
     const register = useCallback(async (data: { name: string; email: string; phone?: string; password: string }) => {

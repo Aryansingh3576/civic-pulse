@@ -1,34 +1,103 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
     LayoutDashboard,
-    Users,
     AlertTriangle,
-    Settings,
     LogOut,
     Shield,
     Menu,
-    X
+    X,
+    Loader2,
+    BarChart3,
+    Users,
+    FileText,
+    Map,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/providers/AuthProvider";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
+
+interface AdminUser {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+}
 
 const sidebarLinks = [
     { href: "/admin/dashboard", label: "Overview", icon: LayoutDashboard },
     { href: "/admin/complaints", label: "Complaints", icon: AlertTriangle },
-    // Future: { href: "/admin/users", label: "Users", icon: Users },
-    // Future: { href: "/admin/settings", label: "Settings", icon: Settings },
+    { href: "/admin/reports", label: "Reports", icon: FileText },
+    { href: "/admin/map", label: "Complaint Map", icon: Map },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const { user, logout } = useAuth();
+    const router = useRouter();
     const [isMobileOpen, setIsMobileOpen] = useState(false);
+    const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
+    const [isChecking, setIsChecking] = useState(true);
+
+    // If we're on the admin login page, skip auth check entirely
+    const isLoginPage = pathname === "/admin/login";
+
+    useEffect(() => {
+        if (isLoginPage) {
+            setIsChecking(false);
+            return;
+        }
+
+        // Check for admin auth
+        const token = localStorage.getItem("admin_token");
+        const userStr = localStorage.getItem("admin_user");
+
+        if (!token || !userStr) {
+            router.replace("/admin/login");
+            return;
+        }
+
+        try {
+            const user = JSON.parse(userStr);
+            if (user.role !== "admin") {
+                localStorage.removeItem("admin_token");
+                localStorage.removeItem("admin_user");
+                router.replace("/admin/login");
+                return;
+            }
+            setAdminUser(user);
+        } catch {
+            router.replace("/admin/login");
+            return;
+        }
+
+        setIsChecking(false);
+    }, [isLoginPage, router, pathname]);
+
+    function handleLogout() {
+        localStorage.removeItem("admin_token");
+        localStorage.removeItem("admin_user");
+        router.push("/admin/login");
+    }
+
+    // For the login page, render children directly (no sidebar)
+    if (isLoginPage) {
+        return <>{children}</>;
+    }
+
+    // Loading state while checking auth
+    if (isChecking) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <div className="text-center space-y-4">
+                    <Loader2 className="size-8 animate-spin text-primary mx-auto" />
+                    <p className="text-sm text-muted-foreground">Verifying admin access…</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-background flex">
@@ -59,28 +128,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                         "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all group relative overflow-hidden",
                                         isActive
                                             ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
-                                            : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
+                                            : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
                                     )}
                                 >
                                     <link.icon className="size-5" />
                                     {link.label}
-                                    {isActive && <motion.div layoutId="admin-active" className="absolute inset-0 bg-primary -z-10" />}
                                 </Link>
                             );
                         })}
                     </nav>
 
-                    <div className="mt-auto pt-6 border-t border-white/5">
+                    <div className="mt-auto pt-6 border-t border-border/20">
                         <div className="flex items-center gap-3 mb-4 px-2">
                             <div className="size-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
-                                {user?.name?.substring(0, 2).toUpperCase() || "AD"}
+                                {adminUser?.name?.substring(0, 2).toUpperCase() || "AD"}
                             </div>
                             <div className="overflow-hidden">
-                                <p className="text-sm font-medium truncate">{user?.name}</p>
-                                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+                                <p className="text-sm font-medium truncate">{adminUser?.name || "Admin"}</p>
+                                <p className="text-xs text-muted-foreground truncate">{adminUser?.email}</p>
                             </div>
                         </div>
-                        <Button variant="ghost" className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10" onClick={logout}>
+                        <Button
+                            variant="ghost"
+                            className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={handleLogout}
+                        >
                             <LogOut className="mr-2 size-4" /> Sign Out
                         </Button>
                     </div>

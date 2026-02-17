@@ -147,7 +147,7 @@ export default function LoginPage() {
                                 </Button>
                             </form>
                         </CardContent>
-                        <CardFooter className="justify-center pb-6">
+                        <CardFooter className="flex flex-col gap-3 pb-6">
                             <p className="text-sm text-muted-foreground">
                                 Don&apos;t have an account?{" "}
                                 <Link
@@ -155,6 +155,15 @@ export default function LoginPage() {
                                     className="text-primary font-medium cursor-pointer hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
                                 >
                                     Create one
+                                </Link>
+                            </p>
+                            <p className="text-xs text-muted-foreground/60">
+                                Are you an admin?{" "}
+                                <Link
+                                    href="/admin/login"
+                                    className="text-primary/70 font-medium hover:underline"
+                                >
+                                    Admin Portal →
                                 </Link>
                             </p>
                         </CardFooter>

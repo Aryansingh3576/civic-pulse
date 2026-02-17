@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/providers/AuthProvider";
+import { LanguageProvider } from "@/providers/LanguageProvider"; // Added
+import { Toaster } from "@/components/ui/toaster"; // Added
 import SmoothScroll from "@/components/smooth-scroll";
 import Navbar from "@/components/navbar";
 import "./globals.css";
@@ -24,19 +26,23 @@ export default function RootLayout({
       <body className={`${inter.variable} ${outfit.variable} antialiased min-h-screen flex flex-col`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
+          defaultTheme="light"
+          forcedTheme="light"
           enableSystem={false}
           disableTransitionOnChange
         >
-          <AuthProvider>
-            <SmoothScroll>
-              <div className="bg-mesh" aria-hidden="true" />
-              <Navbar />
-              <main className="flex-1 w-full relative z-0">
-                {children}
-              </main>
-            </SmoothScroll>
-          </AuthProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              <SmoothScroll>
+                <div className="bg-mesh" aria-hidden="true" />
+                <Navbar />
+                <main className="flex-1 w-full relative z-0">
+                  {children}
+                </main>
+              </SmoothScroll>
+              <Toaster />
+            </AuthProvider>
+          </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>

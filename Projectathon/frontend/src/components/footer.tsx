@@ -1,5 +1,4 @@
-// components/footer.tsx — Responsive footer
-// Follows: UI/UX SKILL (Lucide icons, cursor-pointer), Web Design (semantic HTML, links use <a>)
+// components/footer.tsx — Premium CivicPulse Footer
 import Link from "next/link";
 import {
     Shield,
@@ -12,22 +11,27 @@ import {
     BarChart3,
     Trophy,
     ArrowUpRight,
+    Linkedin,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 const quickLinks = [
     { href: "/report", label: "Report Issue", icon: FileText },
-    { href: "/dashboard", label: "Dashboard", icon: BarChart3 },
+    { href: "/dashboard", label: "Track Complaint", icon: BarChart3 },
+    { href: "/categories", label: "Categories", icon: MapPin },
     { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
 ];
 
 const categories = [
-    "Road Damage",
-    "Streetlights",
-    "Sanitation",
+    "Garbage / Waste",
     "Water Supply",
-    "Parks",
-    "Traffic",
+    "Electricity",
+    "Road Damage",
+    "Street Lights",
+    "Public Safety",
+    "Drainage / Sewer",
+    "Stray Animals",
+    "Other",
 ];
 
 export default function Footer() {
@@ -49,8 +53,11 @@ export default function Footer() {
                             <span className="gradient-text">CivicPulse</span>
                         </Link>
                         <p className="mt-4 text-sm text-muted-foreground leading-relaxed max-w-xs">
-                            AI-powered civic issue reporting with gamification, real-time
-                            tracking, and community engagement.
+                            A premium civic issue reporting platform with AI-powered categorization,
+                            real-time tracking, and transparent resolution workflows.
+                        </p>
+                        <p className="mt-3 text-xs text-muted-foreground/60">
+                            support@civicpulse.io
                         </p>
                     </div>
 
@@ -101,7 +108,7 @@ export default function Footer() {
                         </ul>
                     </div>
 
-                    {/* Social */}
+                    {/* Social + Connect */}
                     <div>
                         <h3 className="text-sm font-semibold text-foreground mb-4">
                             Connect
@@ -118,7 +125,12 @@ export default function Footer() {
                                     label: "Twitter",
                                     href: "https://twitter.com",
                                 },
-                                { icon: Mail, label: "Email", href: "mailto:hello@civicpulse.io" },
+                                {
+                                    icon: Linkedin,
+                                    label: "LinkedIn",
+                                    href: "https://linkedin.com",
+                                },
+                                { icon: Mail, label: "Email", href: "mailto:support@civicpulse.io" },
                             ].map((social) => (
                                 <a
                                     key={social.label}
@@ -129,7 +141,7 @@ export default function Footer() {
                                             ? "noopener noreferrer"
                                             : undefined
                                     }
-                                    className="flex items-center justify-center size-10 rounded-lg text-muted-foreground cursor-pointer transition-colors duration-200 hover:text-foreground hover:bg-accent/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                                    className="flex items-center justify-center size-10 rounded-lg text-muted-foreground cursor-pointer transition-colors duration-200 hover:text-foreground hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                     aria-label={social.label}
                                 >
                                     <social.icon className="size-5" aria-hidden="true" />

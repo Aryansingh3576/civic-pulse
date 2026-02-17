@@ -1,5 +1,5 @@
 // app/report/page.tsx — Report issue page
-// Follows: Web Design Guidelines (heading hierarchy, semantic HTML)
+import { Suspense } from "react";
 import { Container } from "@/components/ui/grid";
 import ComplaintForm from "@/components/complaint-form";
 
@@ -10,21 +10,23 @@ export const metadata = {
 
 export default function ReportPage() {
     return (
-        <section className="py-12 sm:py-20" aria-labelledby="report-heading">
+        <section className="py-24 sm:py-28" aria-labelledby="report-heading">
             <Container size="md">
                 <div className="text-center mb-8 sm:mb-12">
                     <h1
                         id="report-heading"
-                        className="text-3xl sm:text-4xl font-bold mb-3 text-pretty"
+                        className="text-3xl sm:text-4xl font-bold font-[family-name:var(--font-outfit)] mb-3"
                     >
-                        Report an Issue
+                        Report an <span className="gradient-text">Issue</span>
                     </h1>
                     <p className="text-muted-foreground max-w-md mx-auto">
-                        Describe the problem, add a photo, and we'll route it to the right
+                        Describe the problem, add a photo, and we&apos;ll route it to the right
                         department automatically.
                     </p>
                 </div>
-                <ComplaintForm />
+                <Suspense fallback={<div className="text-center py-20 text-muted-foreground">Loading form...</div>}>
+                    <ComplaintForm />
+                </Suspense>
             </Container>
         </section>
     );

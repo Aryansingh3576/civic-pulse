@@ -3,9 +3,30 @@
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
-import { ArrowRight, Shield, Zap, Activity, ChevronRight } from "lucide-react";
+import {
+  ArrowRight,
+  ChevronRight,
+  Layers,
+  MapPinned,
+  ArrowUpCircle,
+  Camera,
+  Copy,
+  CheckCircle2,
+  Clock,
+  Activity,
+  Trophy,
+  BookOpen,
+  Gamepad2,
+  BarChart3,
+  Map,
+  Vote,
+  Siren,
+  Building2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import StatCard from "@/components/stat-card";
+import Footer from "@/components/footer";
 
 export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -19,11 +40,11 @@ export default function Home() {
 
   return (
     <div ref={containerRef} className="relative overflow-hidden">
-      {/* Hero Section */}
+      {/* ─── Hero Section ─── */}
       <section className="relative min-h-screen flex items-center justify-center pt-20 px-4 sm:px-6 lg:px-8">
         <div className="absolute inset-0 -z-10">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[128px] animate-pulse-glow" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-[128px] animate-pulse-glow" style={{ animationDelay: "1s" }} />
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/15 rounded-full blur-[128px] animate-pulse-glow" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/10 rounded-full blur-[128px] animate-pulse-glow" style={{ animationDelay: "1s" }} />
         </div>
 
         <motion.div
@@ -40,11 +61,11 @@ export default function Home() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
               </span>
-              CivicPulse 2.0 is Live
+              CivicPulse — Now Live
             </Badge>
-            <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold tracking-tight font-[family-name:var(--font-outfit)] leading-[1.1]">
-              Empower Your <br />
-              <span className="gradient-text">Community</span> Today.
+            <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight font-[family-name:var(--font-outfit)] leading-[1.1]">
+              Report civic issues <br />
+              <span className="gradient-text">in seconds.</span>
             </h1>
           </motion.div>
 
@@ -54,7 +75,8 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed"
           >
-            Report infrastructure issues, track real-time resolution, and earn rewards for making your city a better place to live.
+            Track resolution transparently. Hold authorities accountable.
+            Make your community a better place to live.
           </motion.p>
 
           <motion.div
@@ -64,12 +86,12 @@ export default function Home() {
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <Button asChild size="lg" className="h-12 px-8 rounded-full text-base shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all hover:scale-105 active:scale-95">
-              <Link href="/dashboard">
-                Launch Dashboard <ArrowRight className="ml-2 size-5" />
+              <Link href="/report">
+                Report an Issue <ArrowRight className="ml-2 size-5" />
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="h-12 px-8 rounded-full text-base bg-background/50 hover:bg-background/80 border-white/10 hover:border-white/20 backdrop-blur-md transition-all">
-              <Link href="/report">Submit a Report</Link>
+            <Button asChild variant="outline" size="lg" className="h-12 px-8 rounded-full text-base bg-background/50 hover:bg-background/80 border-border/50 hover:border-primary/30 backdrop-blur-md transition-all">
+              <Link href="/dashboard">Track Complaint</Link>
             </Button>
           </motion.div>
         </motion.div>
@@ -86,42 +108,154 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* Features Grid */}
-      <section className="py-24 sm:py-32 relative">
+      {/* ─── Stats Section ─── */}
+      <section className="py-20 sm:py-28 relative">
         <div className="container px-4 md:px-6 mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <FeatureCard
-              icon={Zap}
-              title="Real-Time Tracking"
-              description="Monitor the status of your reports instantly. Get notified when issues are resolved."
-              delay={0}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl sm:text-4xl font-bold font-[family-name:var(--font-outfit)] mb-3">
+              Real impact, <span className="gradient-text">measurable results</span>
+            </h2>
+            <p className="text-muted-foreground max-w-lg mx-auto">
+              Our platform is driving change across communities — here are the numbers.
+            </p>
+          </motion.div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
+            <StatCard
+              icon={<CheckCircle2 className="size-5" />}
+              value={12500}
+              suffix="+"
+              label="Issues Resolved"
             />
-            <FeatureCard
-              icon={Shield}
-              title="Secure & Private"
-              description="Your data is encrypted. Report anonymously or build a trusted profile."
-              delay={0.1}
+            <StatCard
+              icon={<Clock className="size-5" />}
+              value={48}
+              suffix=" hrs"
+              label="Avg Response Time"
             />
-            <FeatureCard
-              icon={Activity}
-              title="Gamified Impact"
-              description="Earn points and badges for your contributions. Compete on the leaderboard."
-              delay={0.2}
+            <StatCard
+              icon={<Activity className="size-5" />}
+              value={85}
+              suffix="+"
+              label="Active Areas"
             />
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* ─── Quick Access ─── */}
+      <section className="py-16 sm:py-20 relative">
+        <div className="container px-4 md:px-6 mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            className="text-center mb-10"
+          >
+            <h2 className="text-3xl sm:text-4xl font-bold font-[family-name:var(--font-outfit)] mb-3">
+              Explore <span className="gradient-text">CivicPulse</span>
+            </h2>
+            <p className="text-muted-foreground max-w-lg mx-auto">
+              Quick access to all the tools you need to engage with your community.
+            </p>
+          </motion.div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
+            {[
+              { href: "/leaderboard", label: "Leaderboard", icon: Trophy, color: "text-amber-500", bg: "bg-amber-500/10" },
+              { href: "/civic-education", label: "Civic Education", icon: BookOpen, color: "text-blue-500", bg: "bg-blue-500/10" },
+              { href: "/civic-simulator", label: "Civic Simulator", icon: Gamepad2, color: "text-violet-500", bg: "bg-violet-500/10" },
+              { href: "/analytics", label: "Analytics", icon: BarChart3, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+              { href: "/map", label: "Issue Map", icon: Map, color: "text-teal-500", bg: "bg-teal-500/10" },
+              { href: "/community-voting", label: "Community Voting", icon: Vote, color: "text-indigo-500", bg: "bg-indigo-500/10" },
+              { href: "/sos", label: "SOS Emergency", icon: Siren, color: "text-rose-500", bg: "bg-rose-500/10" },
+              { href: "/nearby", label: "Nearby Services", icon: Building2, color: "text-cyan-500", bg: "bg-cyan-500/10" },
+            ].map((item, i) => (
+              <motion.div
+                key={item.href}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.05 }}
+              >
+                <Link href={item.href}>
+                  <div className="group glass-card p-5 text-center hover:bg-card/40 transition-all cursor-pointer">
+                    <div className={`inline-flex p-3 rounded-xl mb-3 ${item.bg} ${item.color} group-hover:scale-110 transition-transform duration-300`}>
+                      <item.icon className="size-6" />
+                    </div>
+                    <p className="text-sm font-medium text-foreground">{item.label}</p>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Features Section ─── */}
+      <section className="py-20 sm:py-28 relative">
+        <div className="container px-4 md:px-6 mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            className="text-center mb-14"
+          >
+            <h2 className="text-3xl sm:text-4xl font-bold font-[family-name:var(--font-outfit)] mb-3">
+              Powerful features for <span className="gradient-text">smarter cities</span>
+            </h2>
+            <p className="text-muted-foreground max-w-lg mx-auto">
+              Every feature is designed to make issue reporting faster, smarter, and more transparent.
+            </p>
+          </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            <FeatureCard
+              icon={Layers}
+              title="Auto Categorization"
+              description="Issues are automatically categorized using AI so they reach the right department instantly."
+              delay={0}
+            />
+            <FeatureCard
+              icon={MapPinned}
+              title="Red-Zone Heatmap"
+              description="Identify high-issue areas with real-time heatmaps. Spot patterns and prioritize hotspots."
+              delay={0.1}
+            />
+            <FeatureCard
+              icon={ArrowUpCircle}
+              title="Auto Escalation"
+              description="Unresolved issues are automatically escalated to higher authorities after the deadline."
+              delay={0.2}
+            />
+            <FeatureCard
+              icon={Camera}
+              title="Photo Proof Required"
+              description="Resolution requires verified photo evidence — ensuring accountability and transparency."
+              delay={0.3}
+            />
+            <FeatureCard
+              icon={Copy}
+              title="Duplicate Detection"
+              description="Similar issues are merged automatically, boosting priority and reducing noise."
+              delay={0.4}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ─── CTA Section ─── */}
       <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-primary/5 -skew-y-3 transform origin-bottom-left scale-110" />
         <div className="container px-4 md:px-6 mx-auto relative">
-          <div className="max-w-3xl mx-auto text-center space-y-8 glass-card p-12 md:p-16 border-primary/20 bg-primary/5">
+          <div className="max-w-3xl mx-auto text-center space-y-8 glass-card p-12 md:p-16 border-primary/15 bg-primary/5">
             <h2 className="text-3xl sm:text-5xl font-bold font-[family-name:var(--font-outfit)]">
               Ready to make a difference?
             </h2>
             <p className="text-lg text-muted-foreground">
-              Join thousands of citizens who are actively shaping their future.
+              Join thousands of citizens who are actively shaping their communities.
             </p>
             <Button asChild size="lg" variant="default" className="h-14 px-10 rounded-full text-lg shadow-xl shadow-primary/20">
               <Link href="/register">
@@ -131,11 +265,14 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* ─── Footer ─── */}
+      <Footer />
     </div>
   );
 }
 
-function FeatureCard({ icon: Icon, title, description, delay }: { icon: any, title: string, description: string, delay: number }) {
+function FeatureCard({ icon: Icon, title, description, delay }: { icon: any; title: string; description: string; delay: number }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

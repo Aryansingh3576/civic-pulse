@@ -14,6 +14,7 @@ import {
     FileText,
     Flame,
     Loader2,
+    ShieldCheck,
 } from "lucide-react";
 import { Container } from "@/components/ui/grid";
 import {
@@ -38,24 +39,24 @@ interface LeaderboardUser {
 
 function getBadgeIcon(badge: string) {
     switch (badge) {
-        case "Champion":
-            return <Crown className="size-3.5" aria-hidden="true" />;
-        case "Guardian":
-            return <Award className="size-3.5" aria-hidden="true" />;
         case "Civic Hero":
-            return <Star className="size-3.5" aria-hidden="true" />;
+            return <Crown className="size-3.5" aria-hidden="true" />;
+        case "Neighborhood Guardian":
+            return <ShieldCheck className="size-3.5" aria-hidden="true" />;
+        case "Verified Reporter":
+            return <Award className="size-3.5" aria-hidden="true" />;
         default:
-            return <Flame className="size-3.5" aria-hidden="true" />;
+            return <Star className="size-3.5" aria-hidden="true" />;
     }
 }
 
 function getBadgeVariant(badge: string) {
     switch (badge) {
-        case "Champion":
-            return "default" as const;
-        case "Guardian":
-            return "info" as const;
         case "Civic Hero":
+            return "default" as const;
+        case "Neighborhood Guardian":
+            return "info" as const;
+        case "Verified Reporter":
             return "success" as const;
         default:
             return "secondary" as const;
