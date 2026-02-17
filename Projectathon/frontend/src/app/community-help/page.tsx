@@ -28,14 +28,8 @@ interface HelpRequest {
     location: string; contact: string; time: string; urgent: boolean;
 }
 
-// Mock community help requests
-const MOCK_REQUESTS: HelpRequest[] = [
-    { id: 1, type: "blood", title: "B+ Blood Urgently Needed", description: "Patient at SMS Hospital needs 2 units of B+ blood for surgery scheduled tomorrow morning.", location: "SMS Hospital, Jaipur", contact: "+91-98765-43210", time: "30 min ago", urgent: true },
-    { id: 2, type: "lost_found", title: "Found: Golden Retriever Near C-Scheme", description: "Found a friendly golden retriever near C-Scheme garden, no collar. Currently at my home near JLN Marg.", location: "C-Scheme, Jaipur", contact: "+91-87654-32100", time: "2 hrs ago", urgent: false },
-    { id: 3, type: "water", title: "Water Tanker Required", description: "Colony has had no water supply for 2 days. 40+ families affected. Need emergency water tanker.", location: "Vaishali Nagar, Jaipur", contact: "+91-76543-21098", time: "1 hr ago", urgent: true },
-    { id: 4, type: "medical", title: "Wheelchair Required (Temporary)", description: "Need a wheelchair for my grandmother for 2 weeks while she recovers from knee surgery. Happy to return.", location: "Mansarovar, Jaipur", contact: "+91-65432-10987", time: "5 hrs ago", urgent: false },
-    { id: 5, type: "accident", title: "Road Accident Near Sindhi Camp", description: "Multiple vehicle collision, injured people need help with transport to hospital. Traffic is jammed.", location: "Sindhi Camp, Jaipur", contact: "Call 108", time: "10 min ago", urgent: true },
-];
+// Community help requests — fetched from backend when available
+const MOCK_REQUESTS: HelpRequest[] = [];
 
 export default function CommunityHelpPage() {
     const [filter, setFilter] = useState("all");

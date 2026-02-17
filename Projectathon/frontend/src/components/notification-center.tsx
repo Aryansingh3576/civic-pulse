@@ -4,10 +4,11 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Bell, X, CheckCircle, AlertTriangle, MapPin, MessageSquare,
-    Clock, ChevronRight, Trash2, Eye,
+    Clock, Trash2, Eye, Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useLanguage } from "@/providers/LanguageProvider";
 
 interface Notification {
     id: string;
@@ -35,22 +36,55 @@ const ICON_COLORS: Record<string, string> = {
     system: "text-primary bg-primary/10",
 };
 
-// Default mock notifications — in production these come from a real backend
-const DEFAULT_NOTIFICATIONS: Notification[] = [
-    { id: "1", type: "status_change", title: "Status Updated", message: "Your pothole complaint on MG Road is now In Progress.", time: "2 min ago", read: false, link: "/dashboard" },
-    { id: "2", type: "nearby_issue", title: "New Issue Nearby", message: "Garbage dump reported 500m from your location.", time: "15 min ago", read: false },
-    { id: "3", type: "resolution", title: "Issue Resolved!", message: "Street light complaint on Station Rd has been resolved with photo proof.", time: "1 hr ago", read: false, link: "/dashboard" },
-    { id: "4", type: "upvote", title: "Your Report Gained Votes", message: "Water leakage issue received 5 new upvotes.", time: "3 hrs ago", read: true },
-    { id: "5", type: "system", title: "Welcome to CivicPulse!", message: "Earn points by reporting issues and helping your community.", time: "1 day ago", read: true },
-    { id: "6", type: "status_change", title: "Escalated!", message: "SLA deadline passed — drainage issue escalated to zonal officer.", time: "5 hrs ago", read: false, link: "/dashboard" },
-];
+function timeAgo(dateStr: string) {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    return `${days}d ago`;
+}
 
 export default function NotificationCenter() {
+    const { t } = useLanguage();
     const [open, setOpen] = useState(false);
-    const [notifications, setNotifications] = useState<Notification[]>(DEFAULT_NOTIFICATIONS);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [fetched, setFetched] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
+    const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
     const unread = notifications.filter((n) => !n.read).length;
+
+    // Fetch notifications from backend when dropdown opens
+    useEffect(() => {
+        if (!open || fetched) return;
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        if (!token) { setFetched(true); return; }
+
+        setLoading(true);
+        fetch(`${API}/complaints/notifications`, {
+            headers: { Authorization: `Bearer ${token}` },
+        })
+            .then((r) => r.json())
+            .then((data) => {
+                const raw = data?.data?.notifications || [];
+                setNotifications(raw.map((n: any) => ({
+                    id: String(n.id),
+                    type: n.type || "system",
+                    title: n.title,
+                    message: n.message,
+                    time: n.time,
+                    read: n.read ?? false,
+                    link: n.link,
+                })));
+            })
+            .catch(() => setNotifications([]))
+            .finally(() => { setLoading(false); setFetched(true); });
+    }, [open, fetched, API]);
 
     useEffect(() => {
         function handleClick(e: MouseEvent) {
@@ -72,7 +106,7 @@ export default function NotificationCenter() {
             <button
                 onClick={() => setOpen(!open)}
                 className="relative p-2 rounded-xl hover:bg-white/5 transition-colors"
-                aria-label="Notifications"
+                aria-label={t("notifications")}
             >
                 <Bell className="size-5" />
                 {unread > 0 && (
@@ -98,11 +132,11 @@ export default function NotificationCenter() {
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between px-4 py-3 border-b border-border/20">
-                            <h3 className="font-semibold text-sm">Notifications</h3>
+                            <h3 className="font-semibold text-sm">{t("notifications")}</h3>
                             <div className="flex items-center gap-2">
                                 {unread > 0 && (
                                     <button onClick={markAllRead} className="text-[11px] text-primary hover:underline">
-                                        Mark all read
+                                        {t("mark_all_read")}
                                     </button>
                                 )}
                                 <button onClick={() => setOpen(false)} className="p-1 rounded-lg hover:bg-white/5">
@@ -113,10 +147,14 @@ export default function NotificationCenter() {
 
                         {/* List */}
                         <div className="overflow-y-auto max-h-[380px] scrollbar-hide">
-                            {notifications.length === 0 ? (
+                            {loading ? (
+                                <div className="py-12 flex items-center justify-center">
+                                    <Loader2 className="size-6 animate-spin text-primary" />
+                                </div>
+                            ) : notifications.length === 0 ? (
                                 <div className="py-12 text-center text-sm text-muted-foreground">
                                     <Bell className="size-8 mx-auto mb-2 opacity-30" />
-                                    No notifications yet.
+                                    {t("no_notifications")}
                                 </div>
                             ) : (
                                 notifications.map((n) => {
@@ -140,7 +178,7 @@ export default function NotificationCenter() {
                                                 </div>
                                                 <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{n.message}</p>
                                                 <p className="text-[10px] text-muted-foreground/60 mt-1 flex items-center gap-1">
-                                                    <Clock className="size-3" /> {n.time}
+                                                    <Clock className="size-3" /> {timeAgo(n.time)}
                                                 </p>
                                             </div>
                                         </div>
@@ -154,7 +192,7 @@ export default function NotificationCenter() {
                         {notifications.length > 0 && (
                             <div className="px-4 py-2.5 border-t border-border/20 flex items-center justify-between">
                                 <button onClick={clearAll} className="text-[11px] text-muted-foreground hover:text-rose-400 flex items-center gap-1 transition-colors">
-                                    <Trash2 className="size-3" /> Clear All
+                                    <Trash2 className="size-3" /> {t("clear_all")}
                                 </button>
                                 <span className="text-[10px] text-muted-foreground">{notifications.length} notification{notifications.length !== 1 ? "s" : ""}</span>
                             </div>

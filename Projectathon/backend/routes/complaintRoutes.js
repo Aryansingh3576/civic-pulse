@@ -8,6 +8,7 @@ const router = express.Router();
 router.get('/', complaintController.getAllComplaints);
 router.get('/community', complaintController.getCommunityFeed);
 router.get('/stats', complaintController.getStats);
+router.get('/public-stats', complaintController.getPublicStats);
 router.get('/analytics', complaintController.getAnalytics);
 router.get('/heatmap', complaintController.getHeatmapData);
 router.post('/check-duplicate', complaintController.checkDuplicate);
@@ -43,6 +44,7 @@ router.get('/:id/timeline', complaintController.getTimeline);
 // Protected
 router.post('/', authMiddleware.protect, complaintController.createComplaint);
 router.get('/mine', authMiddleware.protect, complaintController.getMyComplaints);
+router.get('/notifications', authMiddleware.protect, complaintController.getNotifications);
 router.post('/:id/upvote', authMiddleware.protect, complaintController.upvoteComplaint);
 router.patch('/:id/status', authMiddleware.protect, complaintController.updateStatus);
 router.get('/user/fraud-check', authMiddleware.protect, complaintController.checkFraud);

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   ArrowRight,
   ChevronRight,
@@ -22,6 +22,7 @@ import {
   Vote,
   Siren,
   Building2,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -109,43 +110,8 @@ export default function Home() {
       </section>
 
       {/* ─── Stats Section ─── */}
-      <section className="py-20 sm:py-28 relative">
-        <div className="container px-4 md:px-6 mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl sm:text-4xl font-bold font-[family-name:var(--font-outfit)] mb-3">
-              Real impact, <span className="gradient-text">measurable results</span>
-            </h2>
-            <p className="text-muted-foreground max-w-lg mx-auto">
-              Our platform is driving change across communities — here are the numbers.
-            </p>
-          </motion.div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
-            <StatCard
-              icon={<CheckCircle2 className="size-5" />}
-              value={12500}
-              suffix="+"
-              label="Issues Resolved"
-            />
-            <StatCard
-              icon={<Clock className="size-5" />}
-              value={48}
-              suffix=" hrs"
-              label="Avg Response Time"
-            />
-            <StatCard
-              icon={<Activity className="size-5" />}
-              value={85}
-              suffix="+"
-              label="Active Areas"
-            />
-          </div>
-        </div>
-      </section>
+      <StatsSection />
+
 
       {/* ─── Quick Access ─── */}
       <section className="py-16 sm:py-20 relative">
@@ -293,5 +259,59 @@ function FeatureCard({ icon: Icon, title, description, delay }: { icon: any; tit
         </p>
       </div>
     </motion.div>
+  );
+}
+
+function StatsSection() {
+  const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  const [stats, setStats] = useState({ total_complaints: 0, resolved: 0, active_citizens: 0 });
+
+  useEffect(() => {
+    fetch(`${API}/complaints/public-stats`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.data) setStats(data.data);
+      })
+      .catch(() => { });
+  }, [API]);
+
+  return (
+    <section className="py-20 sm:py-28 relative">
+      <div className="container px-4 md:px-6 mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-3xl sm:text-4xl font-bold font-[family-name:var(--font-outfit)] mb-3">
+            Real impact, <span className="gradient-text">measurable results</span>
+          </h2>
+          <p className="text-muted-foreground max-w-lg mx-auto">
+            Our platform is driving change across communities — here are the numbers.
+          </p>
+        </motion.div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
+          <StatCard
+            icon={<CheckCircle2 className="size-5" />}
+            value={stats.total_complaints}
+            suffix="+"
+            label="Total Reports"
+          />
+          <StatCard
+            icon={<CheckCircle2 className="size-5" />}
+            value={stats.resolved}
+            suffix=""
+            label="Resolved"
+          />
+          <StatCard
+            icon={<Users className="size-5" />}
+            value={stats.active_citizens}
+            suffix="+"
+            label="Active Citizens"
+          />
+        </div>
+      </div>
+    </section>
   );
 }

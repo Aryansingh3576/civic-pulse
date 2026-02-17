@@ -618,3 +618,124 @@ exports.getCommunityFeed = catchAsync(async (req, res, next) => {
         data: { posts },
     });
 });
+
+// ─── Dynamic Notifications for Authenticated User ───
+exports.getNotifications = catchAsync(async (req, res, next) => {
+    const userId = req.user._id;
+
+    // Get user's issues
+    const userIssues = await Issue.find({ user_id: userId }).select('_id title').lean();
+    const issueIds = userIssues.map((i) => i._id);
+    const issueTitleMap = {};
+    userIssues.forEach((i) => { issueTitleMap[i._id.toString()] = i.title; });
+
+    // Get timeline events for those issues (last 50)
+    const events = await Timeline.find({ issue_id: { $in: issueIds } })
+        .sort({ created_at: -1 })
+        .limit(50)
+        .lean();
+
+    // Get upvote count changes (votes on user's issues)
+    const recentVotes = await Vote.find({ issue_id: { $in: issueIds } })
+        .sort({ created_at: -1 })
+        .limit(20)
+        .lean();
+
+    // Map timeline events to notifications
+    const notifications = events.map((e) => {
+        const issueTitle = issueTitleMap[e.issue_id?.toString()] || 'Your complaint';
+        let type = 'system';
+        let title = 'Update';
+        let message = e.description || '';
+
+        if (e.event_type === 'status_change') {
+            type = 'status_change';
+            const newStatus = e.new_value || '';
+            if (newStatus === 'Resolved') {
+                type = 'resolution';
+                title = 'Issue Resolved!';
+                message = `"${issueTitle}" has been resolved.`;
+            } else if (newStatus === 'Assigned') {
+                title = 'Assigned to Worker';
+                message = `"${issueTitle}" has been assigned to a department worker.`;
+            } else if (newStatus === 'In Progress') {
+                title = 'Work Started';
+                message = `"${issueTitle}" is now being worked on.`;
+            } else if (newStatus === 'Closed') {
+                title = 'Issue Closed';
+                message = `"${issueTitle}" has been closed.`;
+            } else {
+                title = 'Status Updated';
+                message = `"${issueTitle}" status changed to ${newStatus}.`;
+            }
+        } else if (e.event_type === 'created') {
+            type = 'system';
+            title = 'Report Submitted';
+            message = `Your report "${issueTitle}" was successfully submitted.`;
+        } else if (e.event_type === 'escalated') {
+            type = 'status_change';
+            title = 'Escalated!';
+            message = `SLA deadline passed — "${issueTitle}" has been escalated.`;
+        }
+
+        return {
+            id: e._id,
+            type,
+            title,
+            message,
+            time: e.created_at,
+            read: false,
+            link: `/dashboard/${e.issue_id}`,
+        };
+    });
+
+    // Add upvote notifications (group by issue)
+    const votesByIssue = {};
+    recentVotes.forEach((v) => {
+        const key = v.issue_id?.toString();
+        if (!votesByIssue[key]) votesByIssue[key] = { count: 0, latest: v.created_at };
+        votesByIssue[key].count++;
+        if (v.created_at > votesByIssue[key].latest) votesByIssue[key].latest = v.created_at;
+    });
+
+    Object.keys(votesByIssue).forEach((issueId) => {
+        const title = issueTitleMap[issueId] || 'Your complaint';
+        const data = votesByIssue[issueId];
+        notifications.push({
+            id: `vote_${issueId}`,
+            type: 'upvote',
+            title: 'New Upvotes!',
+            message: `"${title}" received ${data.count} new upvote${data.count > 1 ? 's' : ''}.`,
+            time: data.latest,
+            read: false,
+            link: `/dashboard/${issueId}`,
+        });
+    });
+
+    // Sort by time descending
+    notifications.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+    res.status(200).json({
+        status: 'success',
+        data: { notifications: notifications.slice(0, 30) },
+    });
+});
+
+// ─── Public Stats for Homepage ───
+exports.getPublicStats = catchAsync(async (req, res, next) => {
+    const [totalComplaints, resolvedCount, userCount] = await Promise.all([
+        Issue.countDocuments(),
+        Issue.countDocuments({ status: { $in: ['Resolved', 'Closed'] } }),
+        User.distinct('_id', { role: 'citizen' }).then((ids) => ids.length),
+    ]);
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            total_complaints: totalComplaints,
+            resolved: resolvedCount,
+            active_citizens: userCount,
+        },
+    });
+});
+
