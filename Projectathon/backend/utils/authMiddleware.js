@@ -1,6 +1,5 @@
-const { promisify } = require('util');
 const jwt = require('jsonwebtoken');
-const db = require('../config/db');
+const User = require('../models/User');
 const AppError = require('../utils/AppError');
 const catchAsync = require('../utils/catchAsync');
 
@@ -16,14 +15,10 @@ exports.protect = catchAsync(async (req, res, next) => {
     }
 
     // 2) Verification token
-    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET || 'super-secret-key');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'super-secret-key');
 
-    // 3) Check if user still exists — exclude password_hash
-    const result = await db.query(
-        'SELECT id, name, email, role, points, created_at FROM users WHERE id = $1',
-        [decoded.id]
-    );
-    const currentUser = result.rows[0];
+    // 3) Check if user still exists
+    const currentUser = await User.findById(decoded.id).select('-password_hash');
 
     if (!currentUser) {
         return next(new AppError('The user belonging to this token no longer exists.', 401));

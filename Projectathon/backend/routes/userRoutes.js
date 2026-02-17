@@ -6,6 +6,8 @@ const router = express.Router();
 
 // Public
 router.post('/register', userController.register);
+router.post('/verify-otp', userController.verifyOTP);
+router.post('/resend-otp', userController.resendOTP);
 router.post('/login', userController.login);
 router.get('/leaderboard', userController.getLeaderboard);
 
